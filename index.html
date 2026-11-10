@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中藥植物食療功效圖鑑</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Noto Serif TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        herb: {
+                            50: '#f2f8f4',
+                            100: '#e1eee4',
+                            200: '#c5dfcd',
+                            300: '#9ec7aa',
+                            400: '#72a982',
+                            500: '#508d62',
+                            600: '#3c714c',
+                            700: '#325b3e',
+                            800: '#2a4933',
+                            900: '#233c2b',
+                            950: '#112117',
+                        },
+                        amber: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            500: '#f59e0b',
+                            800: '#92400e',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Noto Serif TC"', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f7f9f7;
+        }
+        .font-serif-title {
+            font-family: 'Noto Serif TC', serif;
+        }
+        /* Card hover animation */
+        .plant-card {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .plant-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -10px rgba(42, 73, 51, 0.15);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #a3c9ad;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #508d62;
+        }
+    </style>
+</head>
+<body class="text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Header / Hero Section -->
+    <header class="bg-gradient-to-b from-herb-900 via-herb-800 to-herb-700 text-white relative overflow-hidden shadow-md">
+        <!-- Botanical Background Pattern overlay -->
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+        <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
+            <svg width="400" height="400" viewBox="0 0 100 100" fill="currentColor">
+                <path d="M50 0 C60 30 90 40 100 50 C70 60 60 90 50 100 C40 70 10 60 0 50 C30 40 40 10 50 0 Z"/>
+            </svg>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 relative z-10">
+            <div class="text-center max-w-3xl mx-auto">
+                <div class="inline-flex items-center space-x-2 bg-herb-600/50 backdrop-blur-sm px-3.5 py-1.5 rounded-full text-herb-100 text-xs sm:text-sm font-medium mb-4 border border-herb-400/30">
+                    <i class="fa-solid fa-seedling text-emerald-300"></i>
+                    <span>傳統草本養生與日常食療對照</span>
+                </div>
+                <h1 class="text-3xl sm:text-5xl font-bold font-serif-title tracking-tight text-white mb-4">
+                    中藥植物食療功效圖鑑
+                </h1>
+                <p class="text-herb-100 text-sm sm:text-base leading-relaxed mb-8 opacity-90">
+                    彙整 30 種常見傳統中草植物，探索其性味歸經、主要保健功效與日常食療應用。
+                </p>
+
+                <!-- Search Box -->
+                <div class="relative max-w-xl mx-auto">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                        <i class="fa-solid fa-magnifying-glass text-herb-600"></i>
+                    </div>
+                    <input type="text" id="searchInput" oninput="filterPlants()" 
+                        placeholder="搜尋植物名稱、功效或標籤（如：貓鬚草、清熱、咳嗽...）" 
+                        class="w-full pl-11 pr-10 py-3.5 bg-white/95 backdrop-blur-md text-gray-900 rounded-2xl shadow-lg focus:outline-none focus:ring-2 focus:ring-herb-400 text-sm sm:text-base placeholder-gray-400 transition-all">
+                    <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Filter Controls -->
+        <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 pb-5">
+            <!-- Category Tabs -->
+            <div class="flex items-center space-x-1 sm:space-x-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar" id="categoryFilters">
+                <button onclick="setCategory('all')" data-cat="all" class="cat-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap bg-herb-700 text-white shadow-sm">
+                    全部 (30)
+                </button>
+                <button onclick="setCategory('清熱解毒')" data-cat="清熱解毒" class="cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap bg-white text-gray-600 hover:bg-herb-50 hover:text-herb-700 border border-gray-200">
+                    清熱解毒
+                </button>
+                <button onclick="setCategory('潤肺止咳')" data-cat="潤肺止咳" class="cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap bg-white text-gray-600 hover:bg-herb-50 hover:text-herb-700 border border-gray-200">
+                    潤肺止咳
+                </button>
+                <button onclick="setCategory('利尿通淋')" data-cat="利尿通淋" class="cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap bg-white text-gray-600 hover:bg-herb-50 hover:text-herb-700 border border-gray-200">
+                    利尿排石
+                </button>
+                <button onclick="setCategory('滋陰補益')" data-cat="滋陰補益" class="cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap bg-white text-gray-600 hover:bg-herb-50 hover:text-herb-700 border border-gray-200">
+                    滋陰補益
+                </button>
+                <button onclick="setCategory('理氣和胃')" data-cat="理氣和胃" class="cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap bg-white text-gray-600 hover:bg-herb-50 hover:text-herb-700 border border-gray-200">
+                    理氣和胃
+                </button>
+                <button onclick="setCategory('活血散瘀')" data-cat="活血散瘀" class="cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap bg-white text-gray-600 hover:bg-herb-50 hover:text-herb-700 border border-gray-200">
+                    活血散瘀
+                </button>
+            </div>
+
+            <!-- Result Count & View Toggle -->
+            <div class="flex items-center justify-between md:justify-end gap-3 text-xs sm:text-sm text-gray-500">
+                <span>共找到 <strong id="resultCount" class="text-herb-700 font-semibold">30</strong> 種植物</span>
+            </div>
+        </div>
+
+        <!-- Plants Grid -->
+        <div id="plantsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <!-- Cards will be dynamically rendered here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16 bg-white rounded-3xl border border-dashed border-gray-300">
+            <div class="w-16 h-16 bg-herb-50 text-herb-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-leaf"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-1">未找到相關植物</h3>
+            <p class="text-gray-500 text-sm mb-4">請嘗試搜尋其他關鍵字或切換分類篩選</p>
+            <button onclick="resetFilters()" class="px-4 py-2 bg-herb-600 text-white rounded-xl text-sm font-medium hover:bg-herb-700 transition">
+                重置篩選條件
+            </button>
+        </div>
+    </main>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="relative bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col transform transition-all">
+            
+            <!-- Modal Header with Pattern Background -->
+            <div id="modalHeader" class="relative bg-gradient-to-r from-herb-800 to-herb-700 text-white p-6 sm:p-8 flex items-start justify-between">
+                <div class="pr-8 relative z-10">
+                    <div class="flex items-center space-x-3 mb-2">
+                        <span id="modalId" class="bg-herb-600/80 text-white text-xs font-bold px-2.5 py-1 rounded-lg border border-herb-400/30">#01</span>
+                        <span id="modalNature" class="bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-1 rounded-lg">微寒</span>
+                    </div>
+                    <h2 id="modalTitle" class="text-2xl sm:text-3xl font-bold font-serif-title tracking-wide">貓鬚草</h2>
+                    <p id="modalAlias" class="text-herb-200 text-xs sm:text-sm mt-1">別名：化石草、腎茶</p>
+                </div>
+                
+                <button onclick="closeModal()" class="text-white/80 hover:text-white bg-black/20 hover:bg-black/30 w-9 h-9 rounded-full flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+
+                <!-- Background Graphic -->
+                <div id="modalIconBg" class="absolute right-4 bottom-2 opacity-15 text-white text-8xl pointer-events-none">
+                    <i class="fa-solid fa-leaf"></i>
+                </div>
+            </div>
+
+            <!-- Modal Body Scrollable -->
+            <div class="p-6 sm:p-8 overflow-y-auto space-y-6">
+                <!-- Tags -->
+                <div>
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">核心功效標籤</h4>
+                    <div id="modalTags" class="flex flex-wrap gap-1.5">
+                        <!-- JS injected -->
+                    </div>
+                </div>
+
+                <!-- Main Efficacy -->
+                <div class="bg-herb-50/70 rounded-2xl p-4 border border-herb-100">
+                    <h4 class="text-sm font-bold text-herb-800 flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-kit-medical text-herb-600"></i>
+                        主要保健與藥理功效
+                    </h4>
+                    <p id="modalEfficacy" class="text-gray-700 text-sm leading-relaxed">
+                        --
+                    </p>
+                </div>
+
+                <!-- Dietary Methods -->
+                <div>
+                    <h4 class="text-sm font-bold text-gray-800 flex items-center gap-2 mb-3">
+                        <i class="fa-solid fa-utensils text-herb-600"></i>
+                        常見日常食療用法
+                    </h4>
+                    <div id="modalDietary" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        <!-- JS injected -->
+                    </div>
+                </div>
+
+                <!-- Caution / Disclaimer -->
+                <div class="bg-amber-50 rounded-2xl p-4 border border-amber-200/60 text-xs text-amber-800 leading-relaxed">
+                    <div class="font-bold flex items-center gap-1.5 mb-1 text-amber-900">
+                        <i class="fa-solid fa-circle-exclamation text-amber-500"></i>
+                        食療食用注意事項
+                    </div>
+                    <p id="modalCaution">草本食療因個人體質不同而異。孕婦、慢性病患者或體質虛寒者使用前請務必諮詢專業中醫師或醫療團隊意見。</p>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-gray-50 border-t border-gray-100 px-6 py-4 flex justify-end">
+                <button onclick="closeModal()" class="px-5 py-2.5 bg-herb-700 hover:bg-herb-800 text-white text-sm font-medium rounded-xl shadow-sm transition">
+                    關閉說明
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-herb-950 text-herb-300 py-8 border-t border-herb-900 mt-12 text-xs sm:text-sm">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+            <p class="font-medium text-herb-200">中藥植物食療功效圖鑑 &copy; 2026</p>
+            <p class="text-herb-400 opacity-80">本圖鑑資訊僅供草本文化普及與日常食療參考，不可作為臨床診斷與替代醫療處方。</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Data and Logic -->
+    <script>
+        // 30 Plants Data List
+        const plantsData = [
+            {
+                id: 1,
+                name: "貓鬚草",
+                alias: "化石草、腎茶",
+                nature: "涼",
+                category: "利尿通淋",
+                icon: "fa-seedling",
+                tags: ["清熱去濕", "排石通淋", "利尿消腫"],
+                summary: "清熱去濕、排石通淋，常應用於預防及改善泌尿系統結石、水腫及腎臟保養。",
+                dietary: [
+                    { type: "泡茶飲用", desc: "取乾品 3-5 克沸水沖泡，亦可搭配甜菊葉改善口感。" },
+                    { type: "煲湯烹煮", desc: "適合與瘦肉或車前草一同燉湯飲用。" }
+                ],
+                caution: "脾胃虛寒者及孕婦宜謹慎，不可過量飲用。"
+            },
+            {
+                id: 2,
+                name: "金不換",
+                alias: "三七葉、羅勒（部分地區稱呼）",
+                nature: "溫",
+                category: "活血散瘀",
+                icon: "fa-leaf",
+                tags: ["活血化瘀", "止血消腫", "定痛"],
+                summary: "活血化瘀、止血消腫，有助於跌打損傷及緩解體內瘀血疼痛。",
+                dietary: [
+                    { type: "入菜炒食", desc: "嫩葉可用於炒蛋或與肉類快炒，增添風味。" },
+                    { type: "泡酒外敷", desc: "鮮葉搗爛敷於患處或浸酒擦拭。" }
+                ],
+                caution: "孕婦忌服，有出血傾向者慎用。"
+            },
+            {
+                id: 3,
+                name: "怕羞草",
+                alias: "含羞草",
+                nature: "微寒",
+                category: "清熱解毒",
+                icon: "fa-spa",
+                tags: ["清熱利濕", "安神鎮靜", "解毒"],
+                summary: "清熱利濕、安神鎮靜，傳統上可用於緩解感冒發熱、失眠及小兒高熱。",
+                dietary: [
+                    { type: "水煎代茶", desc: "全草曬乾後少量煎水飲用（需嚴格控制劑量）。" }
+                ],
+                caution: "含羞草鹼具有一定毒性，不宜長期或大劑量食用，孕婦禁用。"
+            },
+            {
+                id: 4,
+                name: "車前草",
+                alias: "車輪菜、當道",
+                nature: "寒",
+                category: "利尿通淋",
+                icon: "fa-plant-wilt",
+                tags: ["利尿通淋", "清熱明目", "祛痰止咳"],
+                summary: "利尿通淋、清熱明目、祛痰，適合水腫、小便不利及熱咳痰多者。",
+                dietary: [
+                    { type: "車前草茶", desc: "鮮品或乾品水煎，加入少許冰糖作涼茶飲用。" },
+                    { type: "煮粥食療", desc: "煎汁後去渣，入大米煮為稀粥。" }
+                ],
+                caution: "腎虛精滑及內無濕熱者慎服。"
+            },
+            {
+                id: 5,
+                name: "虎耳草",
+                alias: "石荷葉、金線吊芙蓉",
+                nature: "涼",
+                category: "清熱解毒",
+                icon: "fa-clover",
+                tags: ["清熱解毒", "涼血消腫", "止血"],
+                summary: "清熱解毒、涼血消腫，常用於肺熱咳嗽、中耳炎及喉嚨腫痛。",
+                dietary: [
+                    { type: "鮮汁外用", desc: "鮮葉搗汁滴耳或塗抹患處。" },
+                    { type: "水煎服", desc: "搭配少量冰糖煎水服用改善咽喉不適。" }
+                ],
+                caution: "微毒，內服宜在專業醫師指導下控制劑量。"
+            },
+            {
+                id: 6,
+                name: "鐵皮石斛",
+                alias: "黑節草、石斛",
+                nature: "微寒",
+                category: "滋陰補益",
+                icon: "fa-wand-magic-sparkles",
+                tags: ["益胃生津", "滋陰清熱", "明目強腰"],
+                summary: "益胃生津、滋陰清熱，適合口乾煩渴、腸燥便秘、熬夜陰虛及病後虛熱。",
+                dietary: [
+                    { type: "石斛煲湯", desc: "與花旗參、麥冬及烏雞/瘦肉一同慢火燉煮。" },
+                    { type: "打粉沖服", desc: "鐵皮楓斗研磨成粉，以溫開水沖服。" }
+                ],
+                caution: "溫熱病早期或濕溫尚未化熱者不宜早用。"
+            },
+            {
+                id: 7,
+                name: "紫蘇葉",
+                alias: "赤蘇、蘇葉",
+                nature: "溫",
+                category: "理氣和胃",
+                icon: "fa-wind",
+                tags: ["發汗解表", "行氣寬中", "解魚蟹毒"],
+                summary: "發汗解表、行氣寬中，常用於風寒感冒、胸悶腹脹或吃海鮮腹瀉過敏。",
+                dietary: [
+                    { type: "紫蘇薑茶", desc: "紫蘇葉搭配生薑片煮水，適合風寒感冒初起。" },
+                    { type: "佐餐料理", desc: "紫蘇炒木耳或料理螃蟹時加入去腥解毒。" }
+                ],
+                caution: "溫熱病及氣虛表虛暴汗者不宜多服。"
+            },
+            {
+                id: 8,
+                name: "桂花",
+                alias: "木樨、九里香",
+                nature: "溫",
+                category: "理氣和胃",
+                icon: "fa-sun",
+                tags: ["溫肺化飲", "散寒止痛", "清新口氣"],
+                summary: "溫肺化飲、散寒止痛、清新口氣，常製成花茶或糕點，有助暖胃止痛。",
+                dietary: [
+                    { type: "桂花釀/茶", desc: "乾桂花泡綠茶或烏龍茶，亦可做成桂花糖蜜。" },
+                    { type: "桂花湯圓", desc: "煮甜湯時撒上乾桂花，開胃增香。" }
+                ],
+                caution: "體質陰虛火旺者宜少食。"
+            },
+            {
+                id: 9,
+                name: "蘆薈",
+                alias: "盧會、訥會",
+                nature: "寒",
+                category: "清熱解毒",
+                icon: "fa-shield-halved",
+                tags: ["清熱瀉火", "潤腸通便", "解毒涼血"],
+                summary: "清熱瀉火、潤腸通便、解毒涼血，適合緩解熱結便秘與胃火上炎。",
+                dietary: [
+                    { type: "蘆薈蜂蜜水", desc: "去皮留透明果肉，燙熟後加入蜂蜜拌飲。" },
+                    { type: "涼拌蘆薈", desc: "切塊汆燙後冰鎮，淋上檸檬汁食用。" }
+                ],
+                caution: "孕婦、經期女性及脾胃虛寒瀉洩者禁用。"
+            },
+            {
+                id: 10,
+                name: "憂遁草",
+                alias: "沙巴蛇草、鱷嘴花",
+                nature: "涼",
+                category: "清熱解毒",
+                icon: "fa-prescription-bottle-medical",
+                tags: ["清熱解毒", "散瘀消腫", "利濕"],
+                summary: "清熱解毒、散瘀消腫，民間常用於調理體質、抗發炎及調節免疫力。",
+                dietary: [
+                    { type: "鮮葉綠果汁", desc: "鮮葉加蘋果或青蘋果打汁即飲。" },
+                    { type: "曬乾泡茶", desc: "乾葉沖泡作為日常清熱保健茶。" }
+                ],
+                caution: "血壓偏低者或虛寒體質者食用時宜注意血壓變化。"
+            },
+            {
+                id: 11,
+                name: "龍利葉",
+                alias: "龍舌葉、龍利木",
+                nature: "平",
+                category: "潤肺止咳",
+                icon: "fa-lungs",
+                tags: ["清熱化痰", "止咳平喘", "潤肺"],
+                summary: "清熱化痰、止咳平喘，對肺熱咳嗽、乾咳無痰及急性支氣管炎具良好滋潤效果。",
+                dietary: [
+                    { type: "龍利葉蘋果湯", desc: "龍利葉與蘋果、南北杏、瘦肉慢火燉湯。" },
+                    { type: "羅漢果龍利茶", desc: "搭配羅漢果煮水，潤喉化痰效果佳。" }
+                ],
+                caution: "性質平和，一般人群皆可適量食用。"
+            },
+            {
+                id: 12,
+                name: "艾草",
+                alias: "蕭茅、艾蒿",
+                nature: "溫",
+                category: "理氣和胃",
+                icon: "fa-fire-flame-curved",
+                tags: ["溫經散寒", "行氣活血", "安胎止血"],
+                summary: "溫經散寒、止血安胎，常用於女性宮寒痛經、手腳冰冷及調理氣血。",
+                dietary: [
+                    { type: "艾草草仔粿", desc: "鮮嫩艾草打汁融入糯米皮製作點心。" },
+                    { type: "艾葉煮雞蛋", desc: "艾葉與雞蛋、紅糖同煮，為傳統婦科溫補方。" }
+                ],
+                caution: "陰虛血熱者不宜過量食用。"
+            },
+            {
+                id: 13,
+                name: "南非葉",
+                alias: "苦葉、將軍草",
+                nature: "寒",
+                category: "清熱解毒",
+                icon: "fa-capsules",
+                tags: ["清熱解毒", "降三高", "利尿解熱"],
+                summary: "清熱解毒、調節血糖與血壓，具極強苦味，民間常用於熱性體質保健。",
+                dietary: [
+                    { type: "嫩葉泡水", desc: "取 1-2 片鮮葉熱水沖泡飲用。" },
+                    { type: "曬乾煮茶", desc: "乾葉搭配甘草少許煮水以緩和苦味。" }
+                ],
+                caution: "性極寒，脾胃虛寒、低血壓、低血糖及孕婦切勿隨意服用。"
+            },
+            {
+                id: 14,
+                name: "魚腥草",
+                alias: "折耳根、蕺菜",
+                nature: "微寒",
+                category: "清熱解毒",
+                icon: "fa-bacteria",
+                tags: ["清熱解毒", "消痈排膿", "利尿通淋"],
+                summary: "清熱解毒、排膿消痈、利尿，適合肺熱咳嗽、咽喉發炎及尿路感染。",
+                dietary: [
+                    { type: "涼拌魚腥草", desc: "鮮根洗淨，加入蒜末、辣椒與香油涼拌。" },
+                    { type: "魚腥草水", desc: "乾品煎水加冰糖，為天然涼茶。" }
+                ],
+                caution: "虛寒體質及無實熱者不宜多食。"
+            },
+            {
+                id: 15,
+                name: "薄荷葉",
+                alias: "蕃荷菜、升陽菜",
+                nature: "涼",
+                category: "清熱解毒",
+                icon: "fa-snowflake",
+                tags: ["疏散風熱", "清利頭目", "利咽透疹"],
+                summary: "疏散風熱、清利頭目、利咽透疹，常用於風熱感冒、頭痛目赤及咽喉腫痛。",
+                dietary: [
+                    { type: "薄荷檸檬茶", desc: "鮮薄荷葉搭配檸檬與蜂蜜，解暑提神。" },
+                    { type: "入菜飾味", desc: "用於各式甜點、飲料或泰式料理提味。" }
+                ],
+                caution: "汗多表虛者及哺乳期婦女慎用（可能減少乳汁分泌）。"
+            },
+            {
+                id: 16,
+                name: "蚌花",
+                alias: "蚌蘭、紫背萬年青",
+                nature: "涼",
+                category: "潤肺止咳",
+                icon: "fa-spa",
+                tags: ["清熱化痰", "涼血止血", "解毒"],
+                summary: "清熱解毒、涼血止血，對肺熱燥咳、鼻衄出血及百日咳有輔助食療效果。",
+                dietary: [
+                    { type: "蚌花煲瘦肉", desc: "蚌花搭配蜜棗、瘦肉燉湯，清甜潤肺。" },
+                    { type: "蚌花冰糖水", desc: "鮮蚌花加水與冰糖慢火燉煮飲用。" }
+                ],
+                caution: "脾胃虛寒者宜少用。"
+            },
+            {
+                id: 17,
+                name: "火炭母",
+                alias: "赤地利、火炭藤",
+                nature: "涼",
+                category: "清熱解毒",
+                icon: "fa-fire-extinguisher",
+                tags: ["清熱利濕", "涼血解毒", "止瀉"],
+                summary: "清熱利濕、涼血解毒，適用於濕熱腹瀉、腸炎痢疾及皮膚熱毒瘡瘍。",
+                dietary: [
+                    { type: "火炭母涼茶", desc: "與布渣葉搭配煮水，為嶺南傳統涼茶配方。" }
+                ],
+                caution: "無濕熱者及孕婦忌用。"
+            },
+            {
+                id: 18,
+                name: "石菖蒲",
+                alias: "菖蒲、昌本",
+                nature: "溫",
+                category: "滋陰補益",
+                icon: "fa-brain",
+                tags: ["開竅豁痰", "醒神益智", "化濕開胃"],
+                summary: "開竅豁痰、醒神益智、化濕開胃，常用於健忘失眠、耳鳴神志昏迷及濕阻中焦。",
+                dietary: [
+                    { type: "菖蒲遠志茶", desc: "石菖蒲與遠志、茯神煮水，輔助安神助眠。" },
+                    { type: "煲湯佐料", desc: "少許入湯同煲，開胃祛濕。" }
+                ],
+                caution: "陰虛陽亢、煩躁失眠者慎用。"
+            },
+            {
+                id: 19,
+                name: "田七葉",
+                alias: "三七葉",
+                nature: "溫",
+                category: "活血散瘀",
+                icon: "fa-heart-pulse",
+                tags: ["散瘀止血", "消腫定痛", "舒筋活血"],
+                summary: "化瘀止血、消腫定痛，可作為日常活血通絡及舒緩筋骨痠痛的保健食材。",
+                dietary: [
+                    { type: "上湯田七葉", desc: "鮮葉以皮蛋、枸杞上湯滾熟，口感滑嫩。" },
+                    { type: "田七葉炒肉", desc: "與瘦肉絲快炒食用。" }
+                ],
+                caution: "孕婦禁用；出血性疾病發作期慎用。"
+            },
+            {
+                id: 20,
+                name: "臭草",
+                alias: "芸香草、臭艾",
+                nature: "寒",
+                category: "清熱解毒",
+                icon: "fa-smog",
+                tags: ["祛風解表", "清熱解毒", "涼血散瘀"],
+                summary: "祛風解表、涼血解毒、散瘀，常應用於感冒發熱、小兒驚風及綠豆沙解毒提味。",
+                dietary: [
+                    { type: "臭草綠豆沙", desc: "廣東傳統甜品，煲綠豆沙時加入少許臭草提香解毒。" }
+                ],
+                caution: "孕婦嚴禁食用（具刺激子宮收縮作用）。"
+            },
+            {
+                id: 21,
+                name: "到手香",
+                alias: "左手香、過山香",
+                nature: "溫",
+                category: "清熱解毒",
+                icon: "fa-hand-holding-hand",
+                tags: ["清熱消炎", "抑菌散瘀", "解毒"],
+                summary: "清熱消炎、散瘀解毒，對咽喉腫痛、扁桃腺發炎或外敷消腫口腔潰瘍有效。",
+                dietary: [
+                    { type: "鮮葉鹽水含漱", desc: "鮮葉加鹽巴少許咀嚼汁液或煎水漱口。" },
+                    { type: "到手香柳橙汁", desc: "少量鮮葉與柳橙汁打勻飲用以緩解喉痛。" }
+                ],
+                caution: "氣味濃烈且具刺激性，體質敏感者外敷或內服宜先小量測試。"
+            },
+            {
+                id: 22,
+                name: "金錢草",
+                alias: "過路黃、對座草",
+                nature: "微寒",
+                category: "利尿通淋",
+                icon: "fa-coins",
+                tags: ["清熱利濕", "通淋排石", "利膽退黃"],
+                summary: "清熱利濕、通淋排石，為治療與預防泌尿道結石及膽結石的著名草藥。",
+                dietary: [
+                    { type: "金錢草排石茶", desc: "金錢草與玉米鬚煮水代茶飲用。" },
+                    { type: "煲豬胰湯", desc: "與豬胰或瘦肉煲湯，清肝利膽。" }
+                ],
+                caution: "長期服用宜注意補充鉀鹽，脾胃虛寒者不宜久服。"
+            },
+            {
+                id: 23,
+                name: "茴香",
+                alias: "小茴香、茴香菜",
+                nature: "溫",
+                category: "理氣和胃",
+                icon: "fa-pepper-hot",
+                tags: ["溫肝散寒", "理氣和胃", "止痛"],
+                summary: "溫肝散寒、理氣和胃，常用於改善小腹冷痛、胃寒嘔吐、腹脹與疝氣痛。",
+                dietary: [
+                    { type: "茴香水餃/包子", desc: "茴香嫩葉切碎拌肉餡做麵食。" },
+                    { type: "小茴香泡茶", desc: "種子微炒後沖泡熱水飲用，溫胃散寒。" }
+                ],
+                caution: "陰虛火旺、肺熱胃熱者忌服。"
+            },
+            {
+                id: 24,
+                name: "無花果",
+                alias: "映日果、文仙果",
+                nature: "平",
+                category: "潤肺止咳",
+                icon: "fa-apple-whole",
+                tags: ["健胃清腸", "潤肺利咽", "消腫解毒"],
+                summary: "健胃清腸、潤肺利咽、消腫解毒，適合食欲不振、消化不良、咽喉腫痛及便秘。",
+                dietary: [
+                    { type: "無花果煲湯", desc: "乾無花果為港式煲湯常用甘甜底料。" },
+                    { type: "鮮果直接食用", desc: "富含膳食纖維與酵素，幫助消化。" }
+                ],
+                caution: "脂肪肝患者、服藥期糖尿病患者不宜過量食用高糖乾果。"
+            },
+            {
+                id: 25,
+                name: "桑葉",
+                alias: "鐵扇子、蠶葉",
+                nature: "寒",
+                category: "潤肺止咳",
+                icon: "fa-feather-pointed",
+                tags: ["疏散風熱", "清肺潤燥", "清肝明目"],
+                summary: "疏散風熱、清肺潤燥、清肝明目，對風熱感冒、肺燥乾咳及眼赤多淚有效。",
+                dietary: [
+                    { type: "桑葉菊杞茶", desc: "桑葉搭配菊花、枸杞泡茶，平肝明目。" },
+                    { type: "桑葉豬肝湯", desc: "鮮嫩桑葉與豬肝滾湯，養肝明目。" }
+                ],
+                caution: "脾胃虛寒腹瀉者不宜多飲。"
+            },
+            {
+                id: 26,
+                name: "錦繡草",
+                alias: "地錦草、血見愁",
+                nature: "平",
+                category: "清熱解毒",
+                icon: "fa-shield-heart",
+                tags: ["清熱解毒", "涼血止痢", "利濕"],
+                summary: "清熱解毒、涼血止痢，常用於急性腸炎、菌痢及外傷出血瘡瘍。",
+                dietary: [
+                    { type: "煎水代茶", desc: "乾品與甘草煎水服，適合濕熱瀉痢。" }
+                ],
+                caution: "血虛無瘀及孕婦慎用。"
+            },
+            {
+                id: 27,
+                name: "百香果",
+                alias: "熱情果、西番蓮",
+                nature: "平",
+                category: "滋陰補益",
+                icon: "fa-lemon",
+                tags: ["生津止渴", "潤腸通便", "安神開胃"],
+                summary: "生津止渴、潤腸通便、安神，富含維生素C與果膠，能幫助消化與提升免疫力。",
+                dietary: [
+                    { type: "百香果特調", desc: "挖出果肉挖加溫水與蜂蜜飲用。" },
+                    { type: "優格伴食", desc: "淋在原味無糖優格上，美味健康。" }
+                ],
+                caution: "胃酸過多或胃潰瘍發作期不宜空腹食用。"
+            },
+            {
+                id: 28,
+                name: "月桂葉",
+                alias: "香葉、桂葉",
+                nature: "溫",
+                category: "理氣和胃",
+                icon: "fa-bowl-rice",
+                tags: ["健胃消食", "行氣止痛", "祛風物質"],
+                summary: "健胃消食、行氣止痛，常用於燉肉烹飪香料，可促進胃液分泌並減輕腸胃脹氣。",
+                dietary: [
+                    { type: "燉肉煲湯香料", desc: "紅燒肉、咖哩或羅宋湯中放入1-2片提香。" }
+                ],
+                caution: "質地堅硬，上菜前應將葉片撈出避免誤吞。"
+            },
+            {
+                id: 29,
+                name: "芙蓉",
+                alias: "木芙蓉、拒霜花",
+                nature: "涼",
+                category: "清熱解毒",
+                icon: "fa-florin-sign",
+                tags: ["清熱解毒", "涼血消腫", "消疔瘡"],
+                summary: "清熱解毒、涼血消腫，多用於疔瘡腫毒、乳癰及外敷消炎止痛。",
+                dietary: [
+                    { type: "外敷使用", desc: "鮮葉搗爛加蜜調敷患處消腫。" },
+                    { type: "芙蓉花/葉煎水", desc: "少量煎水作清熱解毒洗劑。" }
+                ],
+                caution: "主要多作外用，內服需經專業醫師辨證。"
+            },
+            {
+                id: 30,
+                name: "人參果",
+                alias: "香瓜茄、長壽果",
+                nature: "溫",
+                category: "滋陰補益",
+                icon: "fa-gem",
+                tags: ["補氣益壽", "生津止渴", "健脾益胃"],
+                summary: "補氣益壽、生津止渴、強心益胃，高蛋白低糖，富含高硒及維生素，具良好滋補作用。",
+                dietary: [
+                    { type: "鮮食切片", desc: "熟透後去皮直接食用，口感清甜。" },
+                    { type: "人參果炒肉絲", desc: "七分熟果實切絲與瘦肉快炒。" }
+                ],
+                caution: "未成熟果實口感較差，建議放置成熟軟化後食用。"
+            }
+        ];
+
+        let currentCategory = 'all';
+
+        // Render Cards
+        function renderPlants(data) {
+            const grid = document.getElementById('plantsGrid');
+            const emptyState = document.getElementById('emptyState');
+            const resultCount = document.getElementById('resultCount');
+            
+            grid.innerHTML = '';
+            resultCount.textContent = data.length;
+
+            if (data.length === 0) {
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            grid.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+
+            data.forEach(plant => {
+                const card = document.createElement('div');
+                card.className = "plant-card bg-white rounded-2xl border border-gray-100 shadow-sm hover:border-herb-200 overflow-hidden flex flex-col justify-between cursor-pointer";
+                card.onclick = () => openModal(plant.id);
+
+                // Badges HTML
+                const tagsHtml = plant.tags.map(t => `<span class="bg-herb-50 text-herb-700 text-[11px] font-medium px-2 py-0.5 rounded-md border border-herb-100/80">#${t}</span>`).join(' ');
+
+                card.innerHTML = `
+                    <div class="p-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-bold text-herb-600 bg-herb-50 px-2.5 py-1 rounded-lg border border-herb-200/50">
+                                #${String(plant.id).padStart(2, '0')}
+                            </span>
+                            <span class="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md">
+                                性${plant.nature}
+                            </span>
+                        </div>
+
+                        <div class="flex items-center space-x-3 mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-herb-500 to-herb-700 text-white flex items-center justify-center text-lg shadow-sm flex-shrink-0">
+                                <i class="fa-solid ${plant.icon}"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 font-serif-title group-hover:text-herb-700 transition">
+                                    ${plant.name}
+                                </h3>
+                                <p class="text-xs text-gray-400 truncate max-w-[150px]">${plant.alias}</p>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-gray-600 leading-relaxed mb-4 line-clamp-3">
+                            ${plant.summary}
+                        </p>
+
+                        <div class="flex flex-wrap gap-1">
+                            ${tagsHtml}
+                        </div>
+                    </div>
+
+                    <div class="px-5 py-3 bg-gray-50/80 border-t border-gray-100 flex items-center justify-between text-xs font-semibold text-herb-700 group-hover:bg-herb-50/50 transition">
+                        <span>查看食療與注意</span>
+                        <i class="fa-solid fa-chevron-right text-[10px] transform group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Filter Function
+        function filterPlants() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const clearBtn = document.getElementById('clearSearchBtn');
+            
+            if (query) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+
+            const filtered = plantsData.filter(plant => {
+                const matchCategory = (currentCategory === 'all') || (plant.category === currentCategory);
+                const matchQuery = !query || 
+                    plant.name.toLowerCase().includes(query) ||
+                    plant.alias.toLowerCase().includes(query) ||
+                    plant.summary.toLowerCase().includes(query) ||
+                    plant.tags.some(t => t.toLowerCase().includes(query));
+
+                return matchCategory && matchQuery;
+            });
+
+            renderPlants(filtered);
+        }
+
+        // Set Active Category Filter
+        function setCategory(cat) {
+            currentCategory = cat;
+            
+            // Update active styles
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                if (btn.dataset.cat === cat) {
+                    btn.className = "cat-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap bg-herb-700 text-white shadow-sm";
+                } else {
+                    btn.className = "cat-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap bg-white text-gray-600 hover:bg-herb-50 hover:text-herb-700 border border-gray-200";
+                }
+            });
+
+            filterPlants();
+        }
+
+        // Clear Search
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            filterPlants();
+        }
+
+        // Reset All Filters
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            setCategory('all');
+        }
+
+        // Open Modal
+        function openModal(id) {
+            const plant = plantsData.find(p => p.id === id);
+            if (!plant) return;
+
+            document.getElementById('modalId').textContent = `#${String(plant.id).padStart(2, '0')}`;
+            document.getElementById('modalNature').textContent = `藥性：${plant.nature}`;
+            document.getElementById('modalTitle').textContent = plant.name;
+            document.getElementById('modalAlias').textContent = `別名：${plant.alias}`;
+            document.getElementById('modalEfficacy').textContent = plant.summary;
+            document.getElementById('modalCaution').textContent = plant.caution || "草本食療因個人體質而異，建議根據自身狀況適量食用。";
+
+            // Tags
+            const tagsContainer = document.getElementById('modalTags');
+            tagsContainer.innerHTML = plant.tags.map(t => 
+                `<span class="bg-herb-100 text-herb-800 text-xs font-semibold px-2.5 py-1 rounded-lg border border-herb-200"># ${t}</span>`
+            ).join('');
+
+            // Background Icon
+            document.getElementById('modalIconBg').innerHTML = `<i class="fa-solid ${plant.icon}"></i>`;
+
+            // Dietary Methods
+            const dietaryContainer = document.getElementById('modalDietary');
+            dietaryContainer.innerHTML = plant.dietary.map(item => `
+                <div class="bg-gray-50 p-3.5 rounded-xl border border-gray-100">
+                    <div class="font-bold text-herb-700 mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-dot text-[10px]"></i> ${item.type}
+                    </div>
+                    <p class="text-xs text-gray-600 leading-relaxed">${item.desc}</p>
+                </div>
+            `).join('');
+
+            const modal = document.getElementById('detailModal');
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close Modal
+        function closeModal() {
+            const modal = document.getElementById('detailModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close Modal on backdrop click
+        document.getElementById('detailModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // ESC Key to close modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Initial Render
+        window.onload = function() {
+            renderPlants(plantsData);
+        };
+    </script>
+</body>
+</html>
